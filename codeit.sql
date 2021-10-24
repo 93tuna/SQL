@@ -46,3 +46,83 @@ SELECT * FROM copang_main.member WHERE id = 1 OR 2 (X) // MYSQL은 0만 False > 
 SELECT id, email, age, sign_up_day FROM member 
     WHERE age BETWEEN 20 AND 29 
         AND MONTH(sign_up_day) = 7
+
+SELECT * FROM copang_main.member WHERE sentence LIKE "%\%%" // \ > 이스케이핑 (뒤에 오는 것이 문자로 인식되도록)
+
+SELECT * FROM copang_main.member WHERE sentence LIKE BINARY "%g%"
+SELECT * FROM copang_main.member WHERE sentence LIKE BINARY "%G%" // BINARY : 이진수까지 동일
+// Table info에서 Table collation의 ci : case-insensitive는 대소문자의 구분을 하지 않는다는 뜻.
+
+SELECT * FROM copang_main.member
+ORDER BY height ASC; // ASC : 오름차순 (Null이 있을시 가장 작은 값으로 취급됨.)
+
+SELECT * FROM copang_main.member
+ORDER BY height DESC;
+
+SELECT sign_up_day, email FROM copang_main.member
+ORDER BY YEAR(sign_up_day) DESC, email ASC;
+
+SELECT * FROM ~
+ORDER BY CAST(data AS signed) ASC; // signed : 정수 CAST(data AS ~ ) : 데이터타입을 일시적으로 , demical ...
+
+SELECT * FROM copang_main.member
+ORDER BY sign_up_day DESC
+LIMIT 10; // 10개의 로우만 선택
+
+SELECT * FROM copang_main.member
+ORDER BY sign_up_day DESC
+LIMIT 8, 2; // 9번째 로우부터 2개만 선택
+
+SELECT COUNT(height) FROM copang_main.member; // Null값이 제외되므로 row수를 알고 싶으면 *로
+SELECT COUNT(*) FROM copang_main.member;
+
+SELECT MAX(height) FROM copang_main.member;
+SELECT MIN(height) FROM copang_main.member;
+SELECT AVG(height) FROM copang_main.member; // Null 제외
+// SUM, STD, ABS, SQRT, CEIL, FLOOR, ROUND (합, 표준편차, 절대값, 제곱근, 올림, 내림, 반올림)
+
+SELECT * FROM copang_main.member WHERE address IS NULL; // NULL만
+SELECT * FROM copang_main.member WHERE address IS NOT NULL; // NULL 제외
+
+SELECT * FROM copang_main.member
+WHERE height IS NULL
+	OR weight IS NULL
+    OR address IS NULL;
+
+SELECT 
+	COALESCE(height, "####"),
+    COALESCE(weight, "---"),
+    COALESCE(address, "@@@")
+FROM copang_main.member;
+
+SELECT AVG(age) FROM copang_main.member WHERE age BETWEEN 5 AND 100;
+SELECT * FROM copang_main.member WHERE address NOT LIKE "%호"; (이상한 주소들만)
+
+SELECT COUNT(*), ROUND(AVG(star)) FROM review
+WHERE comment IS NOT NULL
+
+SELECT email, height AS 키, weight AS 몸무게, weight / (height/100) / (height/100) AS BMI FROM copang_main.member
+
+SELECT email, 
+		CONCAT(height, "cm", ", ", weight, "kg") AS "키와 몸무게", 
+        weight / (height/100) / (height/100) AS BMI 
+FROM copang_main.member
+
+SELECT 
+		email, 
+		CONCAT(height, "cm", ", ", weight, "kg") AS "키와 몸무게", 
+        weight / (height/100) / (height/100) AS BMI,
+        
+(CASE
+	WHEN weight IS NULL OR height is NULL THEN "비만 여부 알 수 없음."
+    WHEN weight / (height/100) / (height/100) >= 25 THEN "과체중 또는 비만"
+    WHEN weight / (height/100) / (height/100) >= 18.5
+		AND weight / (height/100) / (height/100) < 25
+        THEN "정상"
+	ELSE "저체중"
+END) AS obesity_check
+
+FROM copang_main.member
+ORDER BY obesity_check ASC;
+
+

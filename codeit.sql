@@ -255,3 +255,65 @@ ORDER BY s_year DESC;
 
 (2) 부분 총계를 나타내기 위해 표시된 NULL은 1
 
+
+// 결합 연산
+SELECT 
+	i.id,
+	i.name,
+	s.item_id,
+	s.inventory_count
+FROM COPANG_MAIN.item AS i LEFT OUTER JOIN COPANG_MAIN.stock AS s
+ON i.id = s.item_id
+
+SELECT 
+	i.id,
+	i.name,
+	s.item_id,
+	s.inventory_count
+FROM COPANG_MAIN.item AS i RIGHT OUTER JOIN COPANG_MAIN.stock AS s
+ON i.id = s.item_id
+
+SELECT 
+	i.id,
+	i.name,
+	s.item_id,
+	s.inventory_count
+FROM COPANG_MAIN.item AS i INNER JOIN COPANG_MAIN.stock AS s
+ON i.id = s.item_id
+
+select
+    p.name,
+    coalesce(s.sales_volume, "판매량 정보 없음") as "판매량"
+from pizza_price_cost as p left outer join sales as s
+on p.id = s.menu_id
+
+
+// 집합 연산 (같은 종류의 테이블끼리만 가능함)
+// MYSQL은 UNION 연산자만 지원 -> 
+(1) A ∩ B (INTERSECT 연산자 사용)
+SELECT * FROM member_A 
+
+INTERSECT 
+
+SELECT * FROM member_B
+
+(2) A - B (MINUS 연산자 또는 EXCEPT 연산자 사용)
+SELECT * FROM member_A 
+
+MINUS
+
+SELECT * FROM member_B
+
+(3) B - A (MINUS 연산자 또는 EXCEPT 연산자 사용)
+SELECT * FROM member_B
+
+MINUS
+
+SELECT * FROM member_A
+
+(4) A U B (UNION 연산자 사용)
+SELECT * FROM member_A
+
+UNION
+
+SELECT * FROM member_B

@@ -317,3 +317,116 @@ SELECT * FROM member_A
 UNION
 
 SELECT * FROM member_B
+
+SELECT
+	old.id AS old_id,
+	old.name AS old_name,
+	new.id AS new_id,
+	new.name AS new_name
+FROM COPANG_MAIN.item AS old LEFT OUTER JOIN COPANG_MAIN.item_new AS new
+ON old.id = new.id >> // 둘 다 column명이 id로 같으므로 USING(id)도 가능
+
+SELECT
+	old.id AS old_id,
+	old.name AS old_name,
+	new.id AS new_id,
+	new.name AS new_name
+FROM COPANG_MAIN.item AS old RIGHT OUTER JOIN COPANG_MAIN.item_new AS new
+ON old.id = new.id
+
+SELECT
+	old.id AS old_id,
+	old.name AS old_name,
+	new.id AS new_id,
+	new.name AS new_name
+FROM COPANG_MAIN.item AS old INNER JOIN COPANG_MAIN.item_new AS new
+ON old.id = new.id
+
+SELECT * FROM COPANG_MAIN.item
+UNION
+SELECT * FROM COPANG_MAIN.item_new
+
+// UNION은 중복되는 데이터는 하나만 보여주므로 모두 보여줘야 할 때는 UNION ALL 을 사용한다.
+
+SELECT
+	i.name, i.id,
+	r.item_id, r.star, r.comment, r.mem_id,
+	m.id, m.email
+FROM
+	COPANG_MAIN.item AS i LEFT OUTER JOIN COPANG_MAIN.review AS r
+		ON i.id = r.item_id
+	LEFT OUTER JOIN COPANG_MAIN.MEMBER AS m
+		ON r.item_id = m.id
+
+SELECT i.id, i.name, avg(star) AS rate
+FROM 
+	COPANG_MAIN.item AS i LEFT OUTER JOIN COPANG_MAIN.review AS r
+		ON i.id = r.item_id
+	LEFT OUTER JOIN COPANG_MAIN.MEMBER AS m
+		ON r.mem_id = m.id
+WHERE m.gender = "f"
+GROUP BY i.id, i.name
+ORDER BY rate DESC;
+
+SELECT i.id, i.name, avg(star) AS rate, count(*)
+FROM 
+	COPANG_MAIN.item AS i LEFT OUTER JOIN COPANG_MAIN.review AS r
+		ON i.id = r.item_id
+	LEFT OUTER JOIN COPANG_MAIN.MEMBER AS m
+		ON r.mem_id = m.id
+WHERE m.gender = "m"
+GROUP BY i.id, i.name
+HAVING count(*) > 1
+ORDER BY rate DESC, count(*) DESC;
+
+SELECT substring(i.registration_date, 1, 4) AS "등록 연도", count(r.star) AS "리뷰 개수", avg(r.star) AS "별점 평균값"
+FROM COPANG_MAIN.review AS r LEFT OUTER JOIN COPANG_MAIN.item AS i
+	ON r.item_id = i.id
+LEFT OUTER JOIN COPANG_MAIN.MEMBER AS m
+	ON r.mem_id = m.id
+WHERE i.gender = "u"
+GROUP BY substring(i.registration_date, 1, 4)
+HAVING count(substring(i.registration_date, 1, 4)) >= 10
+ORDER BY avg(r.star) DESC;
+
+//NATURAL JOIN, CROSS JOIN, SELF JOIN, FULL OUTER JOIN, Non-Equi 조인
+
+SELECT i.id, i.name, AVG(r.star) AS avg_star
+FROM copang_main.item AS i LEFT OUTER JOIN copang_main.review AS r
+ON r.item_id = i.id
+GROUP BY i.id, i.name
+HAVING avg_star < (SELECT AVG(star) FROM COPANG_MAIN.review)
+ORDER BY avg_star DESC;
+
+SELECT
+	i.id,
+	i.name,
+	i.price,
+	(SELECT AVG(price) FROM COPANG_MAIN.item) AS avg_price
+FROM COPANG_MAIN.item AS i
+
+SELECT
+	i.id,
+	i.name,
+	i.price,
+	(SELECT AVG(price) FROM COPANG_MAIN.item) AS avg_price
+FROM COPANG_MAIN.item AS i
+WHERE price > (SELECT AVG(price) FROM COPANG_MAIN.item)
+
+SELECT
+	i.id,
+	i.name,
+	i.price,
+	(SELECT AVG(price) FROM COPANG_MAIN.item) AS avg_price
+FROM COPANG_MAIN.item AS i
+WHERE price = (SELECT MAX(price) FROM COPANG_MAIN.item)
+
+SELECT * FROM COPANG_MAIN.item AS i 
+WHERE i.id IN 
+(
+SELECT r.item_id
+FROM COPANG_MAIN.review AS r
+GROUP BY r.item_id HAVING COUNT(*) >= 3
+)
+
+// ANY, SOME, ALL ...(서브 쿼리) >> 서브 쿼리 값 중 어떤것이라도(ANY, SOME), 모든 것들(ALL) 
